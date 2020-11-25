@@ -1,0 +1,22 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: ubuntu:bionic
+    environment:
+      CXX: /usr/bin/g++
+      CMAKE_CXX_COMPILER: /usr/bin/g++
+    steps:
+      - run: apt-get update && apt-get install -y cmake git build-essential
+      - checkout
+      - run: ls; ls ~/project
+      - run: cd ~/project && mkdir build
+      - run: cd ~/project/build && cmake ..
+      - run: cd ~/project/build && make
+      - run: cd ~/project/build && make test
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+    - build
