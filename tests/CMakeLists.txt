@@ -30,8 +30,14 @@ endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
-
 add_executable(${PROJECT_NAME} GlobTest.cpp)
-target_link_libraries(${PROJECT_NAME} gtest_main example)
+target_link_libraries(${PROJECT_NAME} gtest_main globcpp)
+gtest_discover_tests(${PROJECT_NAME}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/TestHere/)
 
-gtest_discover_tests(${PROJECT_NAME})
+add_custom_command(TARGET ${PROJECT_NAME}
+        PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E rm -rf TestHere)
+add_custom_command(TARGET ${PROJECT_NAME}
+        PRE_LINK
+        COMMAND ${CMAKE_COMMAND} -E make_directory TestHere)
