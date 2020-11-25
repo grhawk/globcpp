@@ -18,13 +18,17 @@ std::vector<Path>* Glob::glob(const std::string& glob) {
 
     guint nextGlobPosition = *(std::min_element(globsPositions.cbegin(), globsPositions.cend()));
     Path basicPath = Path(glob.substr(0, nextGlobPosition));
+    if (!boost::filesystem::exists(basicPath))
+        throw FileNotFoundException(basicPath.string());
 
-//    boost::filesystem::directory_iterator itr_begin(basicPath);
-//    boost::filesystem::directory_iterator itr_end;
-//
-//    for (boost::filesystem::directory_iterator itr(basicPath); itr != itr_end; itr++)
-//        std::cout << itr->path().string() << std::endl;
+    boost::filesystem::directory_iterator itr_begin(basicPath);
+    boost::filesystem::directory_iterator itr_end;
 
+    for (auto itr = itr_begin; itr != itr_end; itr++)
+        result->push_back(itr->path());
 
     return result;
 }
+
+FileNotFoundException::FileNotFoundException(const std::string& msg) : std::runtime_error("File " + msg + " does not exist!"){}
+

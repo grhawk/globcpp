@@ -20,5 +20,9 @@ public:
     std::vector<Path>* glob(const std::string& glob);
 };
 
+class FileNotFoundException : public std::runtime_error {
+public:
+    explicit FileNotFoundException(const std::string& msg);
+};
 
 #endif //EXAMPLE1_GLOB_H
