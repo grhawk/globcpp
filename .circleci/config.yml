@@ -6,10 +6,11 @@ jobs:
     environment:
       CXX: /usr/bin/g++
       CMAKE_CXX_COMPILER: /usr/bin/g++
+      DEBIAN_FRONTEND: noninteractive
     steps:
-      - run: apt-get update && apt-get install -y cmake git build-essential
+      - run: apt-get update && apt-get install -y cmake git build-essential libboost-all-dev
       - checkout
-      - run: ls; ls ~/project
+      - run: apt-cache policy cmake git build-essential libboost-all-dev
       - run: cd ~/project && mkdir build
       - run: cd ~/project/build && cmake ..
       - run: cd ~/project/build && make

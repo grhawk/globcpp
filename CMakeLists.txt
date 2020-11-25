@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.10.2)
 
 set(PROJECT globcpp)
 set(CMAKE_CXX_STANDARD 14)
@@ -7,7 +7,7 @@ project(${PROJECT} VERSION 0.1.0)
 
 find_package(Boost COMPONENTS filesystem regex)
 include_directories(${Boost_INCLUDE_DIRS})
-add_compile_definitions(BOOST_FILESYSTEM_NO_DEPRECATED)
+add_definitions(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 
 enable_testing()
 include(GoogleTest)

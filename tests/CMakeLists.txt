@@ -35,9 +35,10 @@ target_link_libraries(${PROJECT_NAME} gtest_main globcpp)
 gtest_discover_tests(${PROJECT_NAME}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/TestHere/)
 
+# Renew the folder where performing tests
 add_custom_command(TARGET ${PROJECT_NAME}
         PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E rm -rf TestHere)
+        COMMAND ${CMAKE_COMMAND} -E remove -f TestHere)
 add_custom_command(TARGET ${PROJECT_NAME}
         PRE_LINK
         COMMAND ${CMAKE_COMMAND} -E make_directory TestHere)
