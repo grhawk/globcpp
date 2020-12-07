@@ -53,8 +53,7 @@ TEST_F(Glob_OneFile, DirectoryExists_NoGlobbing){
 TEST_F(Glob_OneFile, DirectoryExists_DotSlash){
     Glob glob = Glob();
     std::vector<Path>* result = glob.glob("./");
-    ASSERT_EQ(result->size(), 1);
-    ASSERT_EQ(result->operator[](0).string(), "./file_1");
+    ASSERT_EQ(result->size(), 0);
 }
 
 TEST_F(Glob_OneFile, DirectoryExists_DotSlashStar){

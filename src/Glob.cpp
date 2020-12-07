@@ -6,6 +6,7 @@
 #include <iostream>
 #include <algorithm>
 #include <regex>
+#include <set>
 
 using gh::Glob;
 
@@ -35,39 +36,43 @@ std::vector<Path>* Glob::glob(const std::string& glob) {
      *  7) ./file_?
      */
 
-    size_t lastFolderSeparator = glob.find_last_of(folderSeparator, nextGlobPosition);
-    size_t firstFolderSeparatorAfterGlobChar = std::min(glob.find(folderSeparator, lastFolderSeparator + 1), glob.size());
-    std::string globSymbol;
-    if (lastFolderSeparator == firstFolderSeparatorAfterGlobChar)
-        globSymbol = "";
-    else
-        globSymbol = std::string(glob.cbegin() + lastFolderSeparator + 1, glob.cbegin() + firstFolderSeparatorAfterGlobChar);
-    for (auto it : mapGlobRegex){
-        size_t  last_glob_found = globSymbol.find(it.first);
-        while(last_glob_found != std::string::npos){
-            globSymbol = globSymbol.substr(0, last_glob_found).insert(last_glob_found, it.second).insert(last_glob_found + it.second.size(), globSymbol.substr(last_glob_found + it.first.size(), std::string::npos));
-            last_glob_found = globSymbol.find(it.first);
+    Path searchedPathFolder;
+    Path searchedPathRegex;
+    for (const Path& pathFolderIterator : Path(glob)) {
+        Path next = pathFolderIterator;
+        bool containGlob = false;
+        for (const auto& it : mapGlobRegex) {
+            size_t last_glob_found = pathFolderIterator.string().find(it.first);
+            while (last_glob_found != std::string::npos) {
+                containGlob = true;
+                next = Path(pathFolderIterator.string()
+                                    .substr(0, last_glob_found)
+                                    .insert(last_glob_found, it.second)
+                                    .insert(
+                                            last_glob_found + it.second.size(),
+                                            pathFolderIterator.string()
+                                                    .substr(last_glob_found + it.first.size(),
+                                                            std::string::npos)));
+                last_glob_found = pathFolderIterator.string().find(it.first, last_glob_found + it.second.size());
+            }
         }
-    }
+        searchedPathRegex /= next;
+        if (!containGlob)
+            searchedPathFolder /= next;
 
-    std::string regex;
-    if (lastFolderSeparator != std::string::npos)
-        std::string regex(glob.substr(0, lastFolderSeparator).insert(lastFolderSeparator, globSymbol));
-    else
-        regex = globSymbol;
-    std::regex regexGlob(regex);
+        if (!boost::filesystem::exists(searchedPathFolder))
+            throw FileNotFoundException(searchedPathFolder.string());
 
+        std::cout << "Searched Path Regex -> " << searchedPathRegex.string() << std::endl;
+        std::cout << "Searched Path Folder -> " << searchedPathFolder.string() << std:: endl;
 
-    Path basicPath = Path(glob.substr(0, lastFolderSeparator));
-    if (!boost::filesystem::exists(basicPath))
-        throw FileNotFoundException(basicPath.string());
-
-    boost::filesystem::directory_iterator itr_begin(basicPath);
-    boost::filesystem::directory_iterator itr_end;
-    for (auto itr = itr_begin; itr != itr_end; itr++) {
-        std::string strPath(itr->path().string());
-        if(std::regex_match(strPath.cbegin(), strPath.cend(), regexGlob))
-            result->push_back(itr->path());
+        boost::filesystem::directory_iterator itr_begin(searchedPathFolder);
+        boost::filesystem::directory_iterator itr_end;
+        for (auto itr = itr_begin; itr != itr_end; itr++) {
+            std::string strPath(itr->path().string());
+            if (std::regex_match(strPath.cbegin(), strPath.cend(), std::regex(searchedPathRegex.string())))
+                result->push_back(itr->path());
+        }
     }
 
     return result;
@@ -76,7 +81,7 @@ std::vector<Path>* Glob::glob(const std::string& glob) {
 Glob::Glob() noexcept {
     mapGlobRegex["*"] = "([^\\/]+|)";  // Everything but a directory-change
     mapGlobRegex["**"] = ".*";  // Everything
-    mapGlobRegex["?"] = "[^\\/]+"; // Any character but not a directory-change
+    mapGlobRegex["?"] = "[^\\/]"; // Any character but not a directory-change
 }
 
 gh::FileNotFoundException::FileNotFoundException(const std::string& msg) : std::runtime_error("File " + msg + " does not exist!"){}
