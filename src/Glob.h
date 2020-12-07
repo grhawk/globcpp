@@ -7,22 +7,26 @@
 
 #include <string>
 #include <boost/filesystem.hpp>
+#include <unordered_map>
 
 typedef boost::filesystem::path Path;
 
-class Glob {
-private:
-    const char* m_star = "([^\\/]+|)";  // Everything but a directory-change
-    const char* m_sstar = ".*";  // Everything
-    const char* m_qmark = "[^\\/]+"; // Any character but not a directory-change
+namespace gh {
+    class Glob {
+    private:
+        std::unordered_map<std::string, std::string> mapGlobRegex;
+        typedef std::pair<const std::string, std::string> mapGlobRegexItem;
 
-public:
-    std::vector<Path>* glob(const std::string& glob);
-};
+    public:
+        Glob() noexcept;
 
-class FileNotFoundException : public std::runtime_error {
-public:
-    explicit FileNotFoundException(const std::string& msg);
-};
+        std::vector<Path>* glob(const std::string& glob);
+    };
+
+    class FileNotFoundException : public std::runtime_error {
+    public:
+        explicit FileNotFoundException(const std::string& msg);
+    };
+}
 
 #endif //EXAMPLE1_GLOB_H

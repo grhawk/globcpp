@@ -5,6 +5,8 @@
 #include<gtest/gtest.h>
 #include<Glob.h>
 
+using namespace gh;
+
 void createFile(const std::string& filename){
     std::ofstream MyFile(filename);
     MyFile << "Files can be tricky, but it is fun enough!";
@@ -45,8 +47,7 @@ TEST(Glob, DirectoryExistsEmpty_NoGlobbing){
 TEST_F(Glob_OneFile, DirectoryExists_NoGlobbing){
     Glob glob = Glob();
     std::vector<Path>* result = glob.glob(".");
-    ASSERT_EQ(result->size(), 1);
-    ASSERT_EQ(result->operator[](0).string(), "./file_1");
+    ASSERT_EQ(result->size(), 0);
 }
 
 TEST_F(Glob_OneFile, DirectoryExists_DotSlash){
@@ -59,6 +60,19 @@ TEST_F(Glob_OneFile, DirectoryExists_DotSlash){
 TEST_F(Glob_OneFile, DirectoryExists_DotSlashStar){
     Glob glob = Glob();
     std::vector<Path>* result = glob.glob("./*");
+    ASSERT_EQ(result->size(), 1);
+    ASSERT_EQ(result->operator[](0).string(), "./file_1");
+}
+
+TEST_F(Glob_OneFile, DirectoryExists_DotSlashQuestionMark){
+    Glob glob = Glob();
+    std::vector<Path>* result = glob.glob("./?");
+    ASSERT_EQ(result->size(), 0);
+}
+
+TEST_F(Glob_OneFile, DirectoryExists_DotSlashFile_QM){
+    Glob glob = Glob();
+    std::vector<Path>* result = glob.glob("./file_?");
     ASSERT_EQ(result->size(), 1);
     ASSERT_EQ(result->operator[](0).string(), "./file_1");
 }
